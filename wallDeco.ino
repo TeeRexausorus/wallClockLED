@@ -11,6 +11,7 @@
 const char* ssid = "*******";
 const char* password = "********";
 
+// Initialize the LED strip
 CRGB leds[NUM_LEDS];
 
 // We define the colors
@@ -51,8 +52,8 @@ void setup() {
   Serial.println("");
   Serial.print("Startup reason:");Serial.println(ESP.getResetReason());
 
-  WiFi.begin(ssid, password);
 
+  WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi.");
   int _try = 0;
   while (WiFi.status() != WL_CONNECTED) {
@@ -60,10 +61,11 @@ void setup() {
     delay(500);
   }
   Serial.println("Connected to the WiFi network");
-  
-  // Démarrage du client NTP - Start NTP client
+
+
+  // Start NTP client
   timeClient.begin();
-  // initialize the pushbutton pin as an input:
+  // Initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
 }
 
