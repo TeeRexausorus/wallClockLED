@@ -18,15 +18,23 @@ WiFiUDP ntpUDP;
 
 uint8_t thishue = 0;
 uint8_t deltahue = 15;
-const int buttonPin = D1;     // the number of the pushbutton pin
-int buttonState = 0;         // variable for reading the pushbutton status
-int mode = 1;
-int pos = 0;
-int pos2 = NUM_LEDS/2;
-int tempo = 0;
-int brightness = 5;
-int nbModes = 6;            // nb Arbitraire pour le moment
-bool wasDown = true;
+
+const int buttonPin = D1;           // the number of the pushbutton pin
+int buttonState = LOW;              // variable for reading the pushbutton status
+
+int mode = 6;                       // The mode selected
+const int nbModes = 6;              // The number of available modes. Arbitrary for now.
+
+
+int pos = 0;                        // The position for the LED trains
+int pos2 = NUM_LEDS / 2;
+
+int tempo = 0;                      // A small temporization feature
+
+int brightness = 5;                 // The brightness of the LED strip
+
+bool wasDown = true;                // A boolean to follow if this button was pressed or not.
+
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 
 void setup() {
@@ -55,6 +63,7 @@ void setup() {
 
 int getBrightnessFromPotar(){
   int analogVal = 0;
+  // Average the analog value
   for (int i = 0; i < 20; ++i){
     analogVal += analogRead(A0);
   }
@@ -70,49 +79,46 @@ void loop() {
 
     FastLED.setBrightness(getBrightnessFromPotar());
     buttonState = digitalRead(buttonPin);
-    if (buttonState == LOW) { // bouton ralâché
+    if (buttonState == LOW) {// Button presed
       wasDown = true;
-      /*Serial.print(getHours(timeClient));
-      Serial.print(":");
-      Serial.println(timeClient.getMinutes());*/
     }
-    else if (buttonState == HIGH && wasDown){
+    else if (buttonState == HIGH && wasDown){// Button released
       mode = (mode + 1) % nbModes;
       
       wasDown = false;
     }
 
     switch(mode){
-      case 0:
+      case 0: // Software off
         FastLED.clear();
         FastLED.show(); 
         break;
-      case 1:
+      case 1: // Rainbow
         thishue--;
         fill_rainbow(leds, NUM_LEDS, thishue, deltahue);
         FastLED.show();
         break;
-      case 2:
+      case 2: // Half "brown", half cyan
         fill_solid(leds, 9, marron);
         fill_solid(leds+9, 9, cyan);
         FastLED.show(); 
         break;
-      case 3:
+      case 3: // Full cyan
         fill_solid(leds, NUM_LEDS, cyan);
         FastLED.show();
         break;
-      case 4:
+      case 4: // Cyan trains on white background
         fill_solid(leds, NUM_LEDS, white);
         leds[pos] = cyan;
         leds[pos2] = cyan;
         FastLED.show();
-        if (tempo % 10 == 0){
+        if (tempo % 10 == 0){ //small software temporizing, as to not use delay and slow down the global execution
           pos = (pos + 1) % NUM_LEDS;
           pos2 = (pos2 + 1) % NUM_LEDS;
         }
         tempo++;
         break;
-      case 5:
+      case 5: // Clock
         fill_solid(leds, NUM_LEDS, cyan);
         leds[getHours(timeClient) - 1] = red;
         FastLED.show();
@@ -127,6 +133,7 @@ void loop() {
     delay(10);
 }
 
+//Function that returns the hour in a 0-12 fashion
 int getHours(NTPClient timeClient){
   int hours = timeClient.getHours();
   hours = hours > 12 ? hours - 12 : hours;
