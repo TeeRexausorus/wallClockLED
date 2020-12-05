@@ -6,13 +6,19 @@
 
 #define NUM_LEDS 18
 #define DATA_PIN D6
-const char* ssid = "TADDEI2";
-const char* password = "sonicsonic";
+
+
+const char* ssid = "*******";
+const char* password = "********";
+
 CRGB leds[NUM_LEDS];
+
+// We define the colors
 CRGB marron(255, 153, 100);
 CRGB cyan(0, 245, 225);
 CRGB white(255, 255, 255);
 CRGB red(255, 0, 0);
+
 WiFiClient espClient;
 WiFiUDP ntpUDP;
 
@@ -63,13 +69,17 @@ void setup() {
 
 int getBrightnessFromPotar(){
   int analogVal = 0;
+  int avgDivider = 20;
+
   // Average the analog value
-  for (int i = 0; i < 20; ++i){
+  for (int i = 0; i < avgDivider; ++i){
     analogVal += analogRead(A0);
   }
-  analogVal /= 20;
-  int val = map(analogVal, 450, 485, 10, 255);
-  return val;
+  analogVal /= avgDivider;
+
+
+
+  return map(analogVal, 450, 485, 10, 255); // We map the value read by the potentiometer to the possible values of brightness
 }
 
 void loop() {
@@ -126,10 +136,7 @@ void loop() {
       default:
         break;
     }
-    
-    int analogVal = analogRead(A0);
-    int val = map(analogVal, 450, 485, 0, 255);
-    Serial.println(val);
+
     delay(10);
 }
 
